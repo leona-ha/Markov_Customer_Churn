@@ -1,0 +1,19 @@
+Challenge: Write a churn simulator
+==================================
+- Start with a single customer in a random initial state (A, B, C)
+- Change the state randomly using a transition probability matrix P
+- Simulate N time steps in the same way
+- write the sequence of states to an output file
+
+--------------------------------------------------------------------
+- Do the same but for many customers
+- Add new customers to the system at every time step
+- Structure the code, clean it up, put in on GitHub etc...
+
+--------------------------------------------------------------------
+
+OPTIONAL:
+
+- price the products, estimate customer lifetime value (CLV)
+- Plot the number of customers in each state
+- Try to find a steady state
