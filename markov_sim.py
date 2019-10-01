@@ -55,7 +55,7 @@ class MarkovChain:
 
         return clf
 
-    def cust_nr_checkout(self, state_list, step_nr, new_quote):
+    def cust_nr_checkout(self, state_list, step_nr, new_quote, p_first=False):
         """
         Simulate number of subjects in different states after certain timesteps.
         If no "death-end" (e.g. "churned customer") exits use cust_nr function.
@@ -72,7 +72,11 @@ class MarkovChain:
         state_set = [[i] for i in state_list[:-1]] + [[]]
 
         for i in range(1, step_nr):
-            new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (state_list.sum() * new_quote)).astype(int))
+            if p_first:
+                new_cust = list(np.random.multinomial((state_list.sum()*new_quote),pvals=p_first,size=1)[0])
+            else:
+                new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (state_list.sum() * new_quote)).astype(int))
+
             new_cust = np.append(new_cust, 0)
             for j in range(len(state_list)-1):
                 state_set[j].append(init_state[j] + new_cust[j])
