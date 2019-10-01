@@ -51,10 +51,12 @@ class MarkovChain:
         clf = pd.DataFrame(zip(state_a, state_b, state_c, state_d, state_e), columns=self.states)
 
         return clf
-    def cust_nr_churned(self, state_list, step_nr, new_quote=0.75):
+
+    def cust_nr_checkout(self, state_list, step_nr, new_quote):
         """
         Simulate number of subjects in different states after certain timesteps.
         If no "death-end" (e.g. "churned customer") exits use cust_nr function.
+        Returns a dataframe with length step_nr.
         Arguments:
         - state_list: list or series containing the amount of subjects per state.
             Must be same order as "states"
@@ -69,13 +71,16 @@ class MarkovChain:
         for i in range(1, step_nr):
             new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (state_list.sum() * new_quote)).astype(int))
             new_cust = np.append(new_cust, 0)
-            for j in range(len(state_list) - 1):
+            for j in range(len(state_list)-1):
                 state_set[j].append(init_state[j] + new_cust[j])
             state_set[-1].append(init_state[-1])
+            init_state[-1] = 0
             init_state = (init_state + new_cust).dot(self.tmatrix)
-        clf = pd.DataFrame(state_set, columns=self.states)
+        state_set[-1].append(init_state[-1])
+        csm = pd.DataFrame(state_set).T.astype(int)
+        csm.columns = self.states
 
-        return clf
+        return csm
 
     def get_clv(self, market, price_df, state_list, step_nr, death_end = False):
         """
