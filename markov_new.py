@@ -1,5 +1,9 @@
 """ Define a Customer and a Simulation class to simulate Customer Behaviour """
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 class Customer:
     def __init__(self, states, p_init, tmatrix):
 
