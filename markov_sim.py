@@ -46,7 +46,9 @@ class MarkovChain:
         init_state = np.array(state_list)
         state_set = [[i] for i in state_list]
 
+        count = 0
         for i in range(1, step_nr):
+            count += 1
             new_cust = list((np.random.dirichlet(np.ones(len(state_list))) * (state_list.sum() * new_quote)).astype(int))
             for j in range(len(state_list)):
                 state_set[j].append(init_state[j] + new_cust[j])
@@ -55,7 +57,7 @@ class MarkovChain:
 
         return clf
 
-    def cust_nr_checkout(self, state_list, step_nr, new_quote, p_first=False):
+    def cust_nr_checkout(self, state_list, step_nr, time_dict, p_first=False):
         """
         Simulate number of subjects in different states after certain timesteps.
         If no "death-end" (e.g. "churned customer") exits use cust_nr function.
@@ -64,18 +66,20 @@ class MarkovChain:
         - state_list: list or series containing the amount of subjects per state.
             Must be same order as "states"
         - step_nr: number of timesteps
-        - new_quote: amount of new subjects added per timestep
-            (e.g. 0.75 leads to 0.75* initial number of subjects.
-            If no new subjects should be added set new_quote=0)
+        - time_dict: dictionary containing a time-dependent number of new customers to add per step
         """
         init_state = np.array(state_list)
         state_set = [[i] for i in state_list[:-1]] + [[]]
 
+        count = 0
         for i in range(1, step_nr):
+            count += 1
+            count_index = int(count/60+7)
+            nr_new = int(time_dict[count_index]/60)
             if p_first:
-                new_cust = list(np.random.multinomial((state_list.sum()*new_quote),pvals=p_first,size=1)[0])
+            new_cust = list(np.random.multinomial(nr_new,pvals=p_first,size=1)[0])
             else:
-                new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (state_list.sum() * new_quote)).astype(int))
+                new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (nr_new).astype(int))
 
             new_cust = np.append(new_cust, 0)
             for j in range(len(state_list)-1):
