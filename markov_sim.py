@@ -76,16 +76,17 @@ class MarkovChain:
             count += 1
             count_index = int(count/60+7)
             nr_new = int(time_dict[count_index]/60)
-            if p_first:
-            new_cust = list(np.random.multinomial(nr_new,pvals=p_first,size=1)[0])
-            else:
-                new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (nr_new).astype(int))
 
+            new_cust = list(np.random.multinomial(nr_new,pvals=p_first,size=1)[0])
+
+            #new_cust = list((np.random.dirichlet(np.ones(len(state_list)-1)) * (nr_new).astype(int))
             new_cust = np.append(new_cust, 0)
+
             for j in range(len(state_list)-1):
                 state_set[j].append(init_state[j] + new_cust[j])
             state_set[-1].append(init_state[-1])
             init_state[-1] = 0
+            #print(len(init_state))
             init_state = (init_state + new_cust).dot(self.tmatrix)
         state_set[-1].append(init_state[-1])
         csm = pd.DataFrame(state_set).T.astype(int)
