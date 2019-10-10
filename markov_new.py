@@ -85,14 +85,14 @@ class MarkovSimulation:
 
             if time_dict:
                 count_index = int(count/60+7)
-                new_cust = int(self.time_dict[count_index]/60)
+                new_cust = int(time_dict[count_index]/60)
             else:
                 new_cust = int(self.nr_cust * self.new_quote)
 
             for cust in self.customers:
                 cust.transition()
 
-            for new_cust in range(self.new_cust):
+            for new_cust in range(new_cust):
                 customer = Customer(self.states, self.p_init, self.tmatrix)
                 customer.history = [None] * count + customer.history
                 self.customers.append(customer)
@@ -103,5 +103,4 @@ class MarkovSimulation:
     def __repr__(self):
         return f'''This simulation of customers in a company (e.g.supermarket) runs for {self.nr_steps} periods.
                 \nIn the first step, the customer has {self.nr_cust} customers.
-                \n{self.new_cust} customers are added to the market in each period.
                 \nRun the simulation with the customer_simulation function'''
