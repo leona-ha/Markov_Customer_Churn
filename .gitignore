@@ -16,3 +16,5 @@ objects
 description
 markov.py
 Backup_Notebook.ipynb
+.ipynb_checkpoints
+Challenge_week07
