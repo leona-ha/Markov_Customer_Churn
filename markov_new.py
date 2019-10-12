@@ -33,16 +33,20 @@ class Customer:
 
 class MarkovSimulation:
 
-    def __init__(self, nr_steps, nr_cust,new_quote, states, p_init, tmatrix):
+    def __init__(self, nr_steps, nr_cust,new_quote, states, p_init, tmatrix=None, tmatrix_dict=None, clusters= None,cluster_p=None):
         self.nr_steps = nr_steps
         self.nr_cust = nr_cust
         self.new_quote = new_quote
         self.states = states
         self.p_init = p_init
-        self.tmatrix = np.atleast_2d(tmatrix)
         self.index_dict = {self.states[index]: index for index in range(len(self.states))}
         self.customers = []
         self.history = pd.DataFrame()
+        self.tmatrix = np.atleast_2d(tmatrix)
+
+        self.tmatrix_dict = tmatrix_dict
+        self.cluster_p = cluster_p
+        self.clusters = clusters
 
     '''
         :param nr_steps: Nr. of steps (e.g. minutes/days...) the MarkovChain is simulated.
@@ -54,11 +58,22 @@ class MarkovSimulation:
         :param index_dict: Dictionairy mapping the possible states to an index.
         :param customers: List of Customer class instances.
         :param history: Data frame containing the purchase history of each customer.
+        :param tmatrix_dict: Dictionairy containing tmatrices for different customer clusters.
+        :param cluster_p: List containing the probabilities of customer distribution in the clusters.
+
         '''
 
     def create_customers(self):
         for step in range(self.nr_cust):
             customer = Customer(self.states, self.p_init, self.tmatrix)
+            self.customers.append(customer)
+
+    def create_diff_customers(self):
+        for step in range(self.nr_cust):
+            cluster = np.random.choice(list(range(self.clusters)),p=self.cluster_p,size=1)[0]
+            sub_tmatrix = self.tmatrix_dict[cluster]
+
+            customer = Customer(self.states, self.p_init, sub_tmatrix)
             self.customers.append(customer)
 
     def one_transition(self):
@@ -74,7 +89,10 @@ class MarkovSimulation:
 
     def customer_simulation(self, time_dict = False):
         if len(self.customers) == 0:
-            self.create_customers()
+            if self.tmatrix_dict:
+                self.create_diff_customers()
+            else:
+                self.create_customers()
         else:
             print("Customers have been created already")
 
@@ -93,9 +111,16 @@ class MarkovSimulation:
                 cust.transition()
 
             for new_cust in range(new_cust):
-                customer = Customer(self.states, self.p_init, self.tmatrix)
-                customer.history = [None] * count + customer.history
-                self.customers.append(customer)
+                if self.tmatrix_dict:
+                    cluster = np.random.choice(self.clusters,p=self.cluster_p,size=1)[0]
+                    sub_tmatrix = self.tmatrix_dict[cluster]
+                    customer = Customer(self.states, self.p_init, sub_tmatrix)
+                    customer.history = [None] * count + customer.history
+                    self.customers.append(customer)
+                else:
+                    customer = Customer(self.states, self.p_init, self.tmatrix)
+                    customer.history = [None] * count + customer.history
+                    self.customers.append(customer)
 
         self.create_history()
         print('Customer flow simulation was successful')
